@@ -77,11 +77,10 @@
     const id = btn.dataset.id, name = btn.dataset.name;
     clearPlaying(); btn.classList.add("playing");
     setStatus("Connexion à la voix " + name + "…");
+    // Réglages NATIFS ElevenLabs : on ne force rien (pas de style/stability custom),
+    // la voix sonne comme sur le site ElevenLabs.
     vapi.start(ASSISTANT_ID, {
-      voice: {
-        provider: "11labs", voiceId: id, model: "eleven_multilingual_v2",
-        stability: 0.5, similarityBoost: 0.75, style: 0.15, useSpeakerBoost: true
-      }
+      voice: { provider: "11labs", voiceId: id, model: "eleven_multilingual_v2" }
     }).catch(e => { console.error(e); setStatus("Erreur : " + (e?.message || "réessayez")); clearPlaying(); });
   }
 
