@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Parler à Léa — SecretarIA</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(1200px 600px at 50% -10%, #2b2461 0%, #0f0d24 60%, #08071a 100%);
+    color: #fff; padding: 24px;
+  }
+  .card {
+    width: 100%; max-width: 420px; text-align: center;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
+    border-radius: 24px; padding: 40px 32px; backdrop-filter: blur(8px);
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+  }
+  .brand { font-weight: 800; letter-spacing: .5px; color: #a89df0; font-size: 15px; text-transform: uppercase; }
+  h1 { font-size: 30px; margin: 14px 0 6px; }
+  .sub { color: #b9b6d6; font-size: 15px; line-height: 1.5; margin-bottom: 28px; }
+  button {
+    width: 100%; min-height: 60px; border: none; border-radius: 16px; cursor: pointer;
+    font-size: 19px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, #6d63e6, #8b5cf6);
+    transition: transform .1s ease, filter .15s ease;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:active { transform: scale(.98); }
+  button.live { background: linear-gradient(135deg, #e0556b, #c8384f); }
+  .status { margin-top: 22px; min-height: 26px; font-size: 16px; font-weight: 600; color: #cfe8d4; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#57d38c; margin-right:8px; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .hint { margin-top: 26px; font-size: 12.5px; color: #7c7aa0; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">SecretarIA</div>
+    <h1>Parlez à Léa 🎙️</h1>
+    <p class="sub">Cliquez, autorisez le micro, et discutez avec l'assistante en direct comme au téléphone.</p>
+    <button id="callBtn">📞 Parler à Léa</button>
+    <div class="status" id="status"></div>
+    <div class="hint">Test gratuit · aucun appel téléphonique · tout se passe dans ce navigateur</div>
+  </div>
+
+<script type="module">
+  import Vapi from "https://esm.sh/@vapi-ai/web@2";
+
+  const PUBLIC_KEY = "4848b3a3-80ff-49b0-a24c-967913248c7b";
+  const ASSISTANT_ID = "ed0e9cc7-945e-4449-b577-3ed1d7ae008f";
+
+  const vapi = new Vapi(PUBLIC_KEY);
+  const btn = document.getElementById("callBtn");
+  const status = document.getElementById("status");
+  let active = false;
+
+  const setStatus = (html) => { status.innerHTML = html; };
+
+  btn.addEventListener("click", async () => {
+    if (active) { vapi.stop(); return; }
+    setStatus("Connexion…");
+    try { await vapi.start(ASSISTANT_ID); }
+    catch (e) { setStatus("Erreur : " + (e?.message || "réessayez")); console.error(e); }
+  });
+
+  vapi.on("call-start", () => {
+    active = true; btn.textContent = "🔴 Raccrocher"; btn.classList.add("live");
+    setStatus('<span class="dot"></span>En ligne — parlez à Léa !');
+  });
+  vapi.on("call-end", () => {
+    active = false; btn.textContent = "📞 Parler à Léa"; btn.classList.remove("live");
+    setStatus("Appel terminé. Rappelez-la quand vous voulez.");
+  });
+  vapi.on("speech-start", () => setStatus('<span class="dot"></span>🎙️ Léa parle…'));
+  vapi.on("speech-end", () => setStatus('<span class="dot"></span>À vous…'));
+  vapi.on("error", (e) => {
+    console.error(e);
+    active = false; btn.textContent = "📞 Parler à Léa"; btn.classList.remove("live");
+    setStatus("Souci micro/connexion : " + (e?.errorMsg || e?.error?.message || e?.message || "réessayez"));
+  });
+</script>
+</body>
+</html>
