@@ -80,7 +80,7 @@
     // Réglages NATIFS ElevenLabs : on ne force rien (pas de style/stability custom),
     // la voix sonne comme sur le site ElevenLabs.
     vapi.start(ASSISTANT_ID, {
-      voice: { provider: "11labs", voiceId: id, model: "eleven_multilingual_v2" }
+      voice: { provider: "11labs", voiceId: id, model: "eleven_turbo_v2_5" }
     }).catch(e => { console.error(e); setStatus("Erreur : " + (e?.message || "réessayez")); clearPlaying(); });
   }
 
